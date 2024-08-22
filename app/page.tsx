@@ -2,17 +2,39 @@
 import Image from "next/image";
 import { useState } from "react";
 export default function Home() {
+  // const of todos list to 
   const [toDoList, setToDoList] = useState([
     {
       id: 21546,
       title: 'عنوان النص',
       description: 'وصف المهمة',
       compleat: false
+    },
+    {
+      id: 215346,
+      title: 'عنوان النص',
+      description: 'وصف المهمة',
+      compleat: true
     }
   ]);
 
+  // function to add new todo
   function handelAddToDo(todo) {
     setToDoList((toDoList) => [...toDoList, todo]);
+  }
+
+  // function to delet todo
+  function deleteToDo(id) {
+    setToDoList((toDoList) => toDoList.filter((todo) => todo.id !== id));
+  }
+
+  // function to update compeleted to do
+  function doneToDo(id) {
+    setToDoList((toDoLists) =>
+      toDoLists.map((toDoList) =>
+        toDoList.id === id ? { ...toDoList, compleat: !toDoList.compleat } : toDoList
+      )
+    );
   }
 
   return (
@@ -21,7 +43,7 @@ export default function Home() {
         <div className="container">
           <h1 className="text-center py-3">أنجز يا شفت 💪</h1>
           <div className="todolist">
-            <Todos toDos={toDoList} />
+            <Todos toDos={toDoList} onDeletTodo={deleteToDo} doneToDo={doneToDo} />
             <Form onAddTodo={handelAddToDo} />
             <Progress />
           </div>
@@ -30,44 +52,52 @@ export default function Home() {
     </>
   );
 }
-function Todos({toDos}) {
+
+// output todos main design
+function Todos({ toDos, onDeletTodo, doneToDo }) {
   return (
     <div className="row">
       <ol className="list-group list-group-numbered">
         {toDos.map((todo) => (
-          <ToDo todo={todo} key={todo.id} />
+          <ToDo todo={todo} key={todo.id} onDeletTodo={onDeletTodo} doneToDo={doneToDo}/>
         ))}
       </ol>
     </div>
   );
 }
 
-function ToDo({ todo }) {
+// inechlize one todo templeate
+function ToDo({ todo, onDeletTodo, doneToDo }) {
   return (
     <li className="list-group-item d-flex justify-content-between align-items-start">
       <div className="ms-2 ms-auto" style={todo.compleat ? { textDecoration: "line-through", textDecorationColor: "red", textDecorationStyle: "wavy" } : {}}>
         <div className="fw-bold">{todo.title}</div>
         {todo.description}
       </div>
-      <button className="badge btn bg-info rounded-pill mx-2">{todo.compleat ? '' : '✔️'}</button>
-      <button className="badge btn bg-danger rounded-pill">X</button>
+      <button className="btn bg-info rounded-pill mx-2" onClick={() => doneToDo(todo.id)}>{todo.compleat ? '🎉' : '💪'}</button>
+      <button className="btn bg-danger rounded-pill" onClick={() => onDeletTodo(todo.id)}>🗑️</button>
     </li>
   )
 }
 
-function Form({onAddTodo}) {
+// function to handel form
+function Form({ onAddTodo }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
 
+  // stop default behaviuor
   function FormSubmit(e) {
     e.preventDefault();
 
+    // resive data
     const newTodo = { title, description, compleat: false, id: Date.now() };
+    // stop send when tite is empty
     if (!title) return;
-    console.log(newTodo);
 
+    // call function to add todo
     onAddTodo(newTodo);
 
+    // reset all data
     setTitle("");
     setDescription("");
   }
