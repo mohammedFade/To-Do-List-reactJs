@@ -1,6 +1,9 @@
 "use client";
 import Image from "next/image";
+import { todo } from "node:test";
 import { useState } from "react";
+import ProgressBar from 'react-bootstrap/ProgressBar';
+
 export default function Home() {
   // const of todos list to 
   const [toDoList, setToDoList] = useState([
@@ -8,13 +11,13 @@ export default function Home() {
       id: 21546,
       title: 'عنوان النص',
       description: 'وصف المهمة',
-      compleat: false
+      completed: false
     },
     {
       id: 215346,
       title: 'عنوان النص',
       description: 'وصف المهمة',
-      compleat: true
+      completed: true
     }
   ]);
 
@@ -32,23 +35,26 @@ export default function Home() {
   function doneToDo(id) {
     setToDoList((toDoLists) =>
       toDoLists.map((toDoList) =>
-        toDoList.id === id ? { ...toDoList, compleat: !toDoList.compleat } : toDoList
+        toDoList.id === id ? { ...toDoList, completed: !toDoList.completed } : toDoList
       )
     );
   }
 
   return (
     <>
-      <main className="bg-dark bg-gradient text-white">
+      <main className="text-white">
         <div className="container">
-          <h1 className="text-center py-3">أنجز يا شفت 💪</h1>
+          <h1 className="text-center py-4">أنجز يا شفت 💪</h1>
           <div className="todolist">
             <Todos toDos={toDoList} onDeletTodo={deleteToDo} doneToDo={doneToDo} />
             <Form onAddTodo={handelAddToDo} />
-            <Progress />
+            <Progress toDoList={toDoList} />
           </div>
         </div>
       </main >
+      <footer class="text-center bg-dark text-light py-2">
+        👨‍💻هوي الكود دا حق فادي اوعك تجازفو. &copy;
+      </footer>
     </>
   );
 }
@@ -59,7 +65,7 @@ function Todos({ toDos, onDeletTodo, doneToDo }) {
     <div className="row">
       <ol className="list-group list-group-numbered">
         {toDos.map((todo) => (
-          <ToDo todo={todo} key={todo.id} onDeletTodo={onDeletTodo} doneToDo={doneToDo}/>
+          <ToDo todo={todo} key={todo.id} onDeletTodo={onDeletTodo} doneToDo={doneToDo} />
         ))}
       </ol>
     </div>
@@ -70,11 +76,11 @@ function Todos({ toDos, onDeletTodo, doneToDo }) {
 function ToDo({ todo, onDeletTodo, doneToDo }) {
   return (
     <li className="list-group-item d-flex justify-content-between align-items-start">
-      <div className="ms-2 ms-auto" style={todo.compleat ? { textDecoration: "line-through", textDecorationColor: "red", textDecorationStyle: "wavy" } : {}}>
+      <div className="ms-2 ms-auto" style={todo.completed ? { textDecoration: "line-through", textDecorationColor: "red", textDecorationStyle: "wavy" } : {}}>
         <div className="fw-bold">{todo.title}</div>
         {todo.description}
       </div>
-      <button className="btn bg-info rounded-pill mx-2" onClick={() => doneToDo(todo.id)}>{todo.compleat ? '🎉' : '💪'}</button>
+      <button className="btn bg-info rounded-pill mx-2" onClick={() => doneToDo(todo.id)}>{todo.completed ? '🎉' : '💪'}</button>
       <button className="btn bg-danger rounded-pill" onClick={() => onDeletTodo(todo.id)}>🗑️</button>
     </li>
   )
@@ -90,7 +96,7 @@ function Form({ onAddTodo }) {
     e.preventDefault();
 
     // resive data
-    const newTodo = { title, description, compleat: false, id: Date.now() };
+    const newTodo = { title, description, completed: false, id: Date.now() };
     // stop send when tite is empty
     if (!title) return;
 
@@ -125,10 +131,36 @@ function Form({ onAddTodo }) {
   );
 }
 
-function Progress() {
+function Progress({ toDoList }) {
+  const total = toDoList.length;
+  const done = toDoList.filter((todolist) => todolist.completed).length;
+  const notdone = total - done;
+
+  let out;
+  if (!done) {
+    out = <div className="text-center py-2">ابدا انجازاتك القوية 🦾</div>;
+  } else if (done > 0 && done < total) {
+    if ((done / total) * 100 > 50) {
+      out = <div className="text-center py-2"> أنجزت أكتر من النص🤩 باقي ليك [ {notdone} ] اوعك تقيف 🔥 </div>;
+    } else {
+      out = <div className="text-center py-2"> أنجزت [ {done} ] من [ {total} ] باقي ليك [ {notdone} ] واصل يا شفت 😎 </div>;
+    }
+  } else if (done == total) {
+    out = <div className="text-center py-2">🥳 خمت الشغل مررة واحدة 🥳</div>;
+  }
+  if (total == 0) {
+    out = <div className="text-center py-2">✍️ أضيف مهامك عشان تبدا ✍️</div>;
+  }
   return (
     <div className="row">
-      <div className="progress">
+      {/* {done === 0 && في انظارك لي بداية انجازاتك القوية 🦾 } */}
+      {/* {done !== 0 && فيجازاتك القوية 🦾 } */}
+      <div className="text-center py-2">
+        {out}
+        {/* {done==0 ? `في انظارك لي بداية انجازاتك القوية 🦾` : `أنجزت [ ${done} ] من [ ${total} ] باقي ليك [ ${notdone} ] اوعك تقيف 🔥` } */}
+      </div>
+      <div className="mb-4">
+        <ProgressBar animated now={(done / total) * 100} />
       </div>
     </div>
   );
