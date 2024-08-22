@@ -1,10 +1,8 @@
 "use client";
-import Image from "next/image";
-import { todo } from "node:test";
 import { useState } from "react";
 import ProgressBar from 'react-bootstrap/ProgressBar';
-
 export default function Home() {
+  
   // const of todos list to 
   const [toDoList, setToDoList] = useState([
     {
